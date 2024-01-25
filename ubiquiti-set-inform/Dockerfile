@@ -1,19 +1,31 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim
+FROM python:3.11
 
-# Set the working directory to /app
+# Install cron (if not already installed)
+RUN apt-get update && apt-get install -y cron
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy your script and .env file into the container
+COPY ubt-inform.py .
+COPY requirements.txt .
+COPY .env .
 
-# Install the required Python packages
-RUN pip install paramiko
+# Copy the wrapper script into the container
+COPY wrapper.sh .
 
-# Create a cron job to run the script every 30 minutes
-RUN echo "*/30 * * * * /usr/bin/python /app/ubt-inform.py" > /etc/cron.d/your_cron_job
-RUN chmod 0644 /etc/cron.d/your_cron_job
-RUN crontab /etc/cron.d/your_cron_job
+# Make the wrapper script executable
+RUN chmod +x wrapper.sh
 
-# Run the command on container startup
-CMD ["cron", "-f"]
+# Install any needed packages specified in requirements.txt
+RUN pip install -r requirements.txt
+
+# Define environment variables for sensitive data
+ENV SSH_HOSTNAME=your_ssh_hostname \
+    SSH_PORT=your_ssh_port \
+    SSH_USERNAME=your_ssh_username \
+    SSH_PASSWORD=your_ssh_password \
+    INFORM_URL=your_inform_url
+
+# Set the entry point to the wrapper script
+ENTRYPOINT ["./wrapper.sh"]

@@ -10,17 +10,57 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the full path to the config.ini file
 config_file = os.path.join(script_dir, 'config.ini')
 
+# # Check if config.ini exists, and create a template if not
+# if not os.path.exists(config_file):
+#     with open(config_file, 'w') as config_template:
+#         config_template.write('[SSH]\n')
+#         config_template.write('hostname = \n')
+#         config_template.write('port = \n')
+#         config_template.write('username = \n')
+#         config_template.write('password = \n')
+#         config_template.write('\n')
+#         config_template.write('[URL]\n')
+#         config_template.write('inform_url = \n')
+#     print("A template config.ini file has been created. Please fill in the details.")
+#     exit(1)
+
 # Check if config.ini exists, and create a template if not
 if not os.path.exists(config_file):
+    config = configparser.ConfigParser()
+
+    # Check if environment variables are set and use their values if available
+    hostname = os.environ.get('SSH_HOSTNAME', '')
+    port = os.environ.get('SSH_PORT', '')
+    username = os.environ.get('SSH_USERNAME', '')
+    password = os.environ.get('SSH_PASSWORD', '')
+    inform_url = os.environ.get('INFORM_URL', '')
+
+    # Prompt user for input if environment variables are not set
+    if not hostname:
+        hostname = input("Enter SSH Hostname: ")
+    if not port:
+        port = input("Enter SSH Port: ")
+    if not username:
+        username = input("Enter SSH Username: ")
+    if not password:
+        password = input("Enter SSH Password: ")
+    if not inform_url:
+        inform_url = input("Enter Inform URL: ")
+
+    config['SSH'] = {
+        'hostname': hostname,
+        'port': port,
+        'username': username,
+        'password': password
+    }
+
+    config['URL'] = {
+        'inform_url': inform_url
+    }
+
     with open(config_file, 'w') as config_template:
-        config_template.write('[SSH]\n')
-        config_template.write('hostname = \n')
-        config_template.write('port = \n')
-        config_template.write('username = \n')
-        config_template.write('password = \n')
-        config_template.write('\n')
-        config_template.write('[URL]\n')
-        config_template.write('inform_url = \n')
+        config.write(config_template)
+    
     print("A template config.ini file has been created. Please fill in the details.")
     exit(1)
 

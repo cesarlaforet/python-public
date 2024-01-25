@@ -1,0 +1,17 @@
+version: '3'
+services:
+  ubt-inform:
+    build:
+      context: .
+    container_name: ubt-inform-container
+    environment:
+      - SSH_HOSTNAME=${SSH_HOSTNAME}
+      - SSH_PORT=${SSH_PORT}
+      - SSH_USERNAME=${SSH_USERNAME}
+      - SSH_PASSWORD=${SSH_PASSWORD}
+      - INFORM_URL=${INFORM_URL}
+    restart: always
+    volumes:
+      - ./ubt-inform.py:/app/ubt-inform.py
+      - ./.env:/app/.env
+      
